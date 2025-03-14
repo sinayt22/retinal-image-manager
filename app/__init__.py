@@ -17,6 +17,10 @@ def create_app(config_class=Config):
     with app.app_context():
         from app.models import patient, image
 
+
+    from app.controllers.web.patient_controller import patient_bp
+    app.register_blueprint(patient_bp, url_prefix='/patients')
+    
     setup_upload_destination(app)
 
     return app
