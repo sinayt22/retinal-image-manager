@@ -6,18 +6,18 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 
 
 class EyeSide(enum.Enum):
-    LEFT = 'Left'
-    RIGHT = 'Right'
+    LEFT = 'LEFT'
+    RIGHT = 'RIGHT'
 
 class ImageQualityScore(enum.Enum):
-    LOW = 'Low'
-    ACCEPTABLE = 'Acceptable'
-    HIGH = 'High'
+    LOW = 'LOW'
+    ACCEPTABLE = 'ACCEPTABLE'
+    HIGH = 'HIGH'
 
 class AnatomyScore(enum.Enum):
-    POOR = 'Poor'
-    ACCEPTABLE = 'Acceptable'
-    GOOD = 'Good'
+    POOR = 'POOR'
+    ACCEPTABLE = 'ACCEPTABLE'
+    GOOD = 'GOOD'
 
 class Image(db.Model):
     __tablename__ = 'images'

@@ -29,8 +29,13 @@
                 <tr>
                     <td>{{ patient.id }}</td>
                     <td>{{ patient.age }}</td>
-                    <td>{{ patient.sex.value }}</td>
-                    <td>{{ patient.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        {% if patient.sex.value == 'MALE' %}Male
+                        {% elif patient.sex.value == 'FEMALE' %}Female
+                        {% elif patient.sex.value == 'OTHER' %}Other
+                        {% else %}{{ patient.sex.value }}{% endif %}
+                    </td>
+                    <td>{{ patient.created_at.strftime('%Y-%m-%d %H:%M') if patient.created_at else 'N/A'}}</td>
                     <td>
                         <div class="btn-group" role="group">
                             <a href="{{ url_for('patients.show', id=patient.id) }}" class="btn btn-sm btn-info">View</a>
