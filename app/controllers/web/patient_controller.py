@@ -1,5 +1,6 @@
 import logging
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from datetime import datetime
 
 from app.models.patient import Sex
 from app.services.patient_service import PatientService
@@ -14,18 +15,20 @@ logger = logging.getLogger(__name__)
 @patient_bp.route('/', methods=['GET', 'POST'])
 def index():
     def create_patient():
-        age = request.form.get('age')
+        birth_date_str = request.form.get('birth_date')
         sex = request.form.get('sex')
         
-        errors = validate_patient_data(age, sex)
+        errors = validate_patient_data(birth_date_str, sex)
         if errors:
-            logger.warning(f"Invalid patient data: age={age}, sex={sex}, errors={errors}")
+            logger.warning(f"Invalid patient data: birth_date={birth_date_str}, sex={sex}, errors={errors}")
             for error in errors:
                 flash(error, 'error')
             return render_template('patients/new.html'), 400
         
         try:
-            patient_data = {'age': int(age), 'sex': sex}
+            # Convert string date to Python date object
+            birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').date()
+            patient_data = {'birth_date': birth_date, 'sex': sex}
             patient = patient_service.create_patient(patient_data)
             logger.info(f"Patient created successfully with id={patient.id}")
             flash("Patient created successfully!", "success")
@@ -72,17 +75,19 @@ def update(id):
         flash("Patient not found", "error")
         return redirect(url_for("patients.index"))
     
-    age = request.form.get('age')
+    birth_date_str = request.form.get('birth_date')
     sex = request.form.get('sex')
-    errors = validate_patient_data(age, sex)
+    errors = validate_patient_data(birth_date_str, sex)
     if errors:
-        logger.warning(f"Invalid update data for patient {id}: age={age}, sex={sex}, errors={errors}")
+        logger.warning(f"Invalid update data for patient {id}: birth_date={birth_date_str}, sex={sex}, errors={errors}")
         for error in errors:
             flash(error, 'error')
         return render_template('patients/edit.html', patient=patient), 400
     
     try:
-        patient_data = {'age': int(age), 'sex': sex}
+        # Convert string date to Python date object
+        birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').date()
+        patient_data = {'birth_date': birth_date, 'sex': sex}
         patient_service.update_patient(id, patient_data)
         logger.info(f"Patient {id} updated successfully")
         flash(f"Patient updated successfully!", "success")
@@ -111,12 +116,19 @@ def delete(id):
         return redirect(url_for("patients.index"))
     
 
-def validate_patient_data(age, sex):
+def validate_patient_data(birth_date, sex):
     errors = []
-    if not age:
-        errors.append('Age is required')
-    elif not age.isdigit() or int(age) <= 0:
-        errors.append('Age must be a positive number')
+    if not birth_date:
+        errors.append('Birth date is required')
+    else:
+        try:
+            # Validate date format
+            datetime.strptime(birth_date, '%Y-%m-%d')
+            # Check if the date is not in the future
+            if datetime.strptime(birth_date, '%Y-%m-%d').date() > datetime.now().date():
+                errors.append('Birth date cannot be in the future')
+        except ValueError:
+            errors.append('Birth date must be in YYYY-MM-DD format')
 
     if not sex:
         errors.append("Sex is required")

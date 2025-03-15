@@ -1,4 +1,5 @@
 import pytest
+from datetime import date
 from app.models.patient import Patient, Sex
 from app.services.patient_service import PatientService
 
@@ -42,8 +43,8 @@ class TestPatientService:
     def test_get_all_patients(self, patient_service, monkeypatch):
         # Mock data
         mock_patients = [
-            Patient(id=1, age=30, sex=Sex.MALE),
-            Patient(id=2, age=45, sex=Sex.FEMALE)
+            Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE),
+            Patient(id=2, birth_date=date(1975, 5, 20), sex=Sex.FEMALE)
         ]
         
         # Mock the query
@@ -66,7 +67,7 @@ class TestPatientService:
     
     def test_get_patient_by_id(self, patient_service, monkeypatch):
         # Mock data
-        mock_patient = Patient(id=1, age=30, sex=Sex.MALE)
+        mock_patient = Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE)
         
         # Mock the query
         class MockQuery:
@@ -83,7 +84,7 @@ class TestPatientService:
         # Assertions
         assert patient is not None
         assert patient.id == 1
-        assert patient.age == 30
+        assert patient.birth_date == date(1990, 1, 15)
         assert patient.sex == Sex.MALE
         
         # Test non-existent patient
@@ -93,7 +94,7 @@ class TestPatientService:
     def test_create_patient(self, patient_service, db_session, monkeypatch):
         # Mock data
         patient_data = {
-            'age': 25,
+            'birth_date': date(1995, 10, 5),
             'sex': Sex.FEMALE
         }
         
@@ -101,7 +102,7 @@ class TestPatientService:
         class MockPatient:
             def __init__(self, **kwargs):
                 self.id = 1
-                self.age = kwargs.get('age')
+                self.birth_date = kwargs.get('birth_date')
                 self.sex = kwargs.get('sex')
         
         # Replace the Patient class in the service
@@ -113,7 +114,7 @@ class TestPatientService:
         # Assertions
         assert patient is not None
         assert patient.id == 1
-        assert patient.age == 25
+        assert patient.birth_date == date(1995, 10, 5)
         assert patient.sex == Sex.FEMALE
         
         # Check if session methods were called
@@ -122,7 +123,7 @@ class TestPatientService:
     
     def test_update_patient(self, patient_service, db_session, monkeypatch):
         # Mock data
-        mock_patient = Patient(id=1, age=30, sex=Sex.MALE)
+        mock_patient = Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE)
         
         # Mock the get_patient_by_id method
         monkeypatch.setattr(
@@ -133,7 +134,7 @@ class TestPatientService:
         
         # Update data
         update_data = {
-            'age': 31,
+            'birth_date': date(1990, 1, 16),
             'sex': Sex.OTHER
         }
         
@@ -142,7 +143,7 @@ class TestPatientService:
         
         # Assertions
         assert updated_patient is not None
-        assert updated_patient.age == 31
+        assert updated_patient.birth_date == date(1990, 1, 16)
         assert updated_patient.sex == Sex.OTHER
         assert db_session.committed is True
         
@@ -152,7 +153,7 @@ class TestPatientService:
     
     def test_delete_patient(self, patient_service, db_session, monkeypatch):
         # Mock data
-        mock_patient = Patient(id=1, age=30, sex=Sex.MALE)
+        mock_patient = Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE)
         
         # Mock the get_patient_by_id method
         monkeypatch.setattr(

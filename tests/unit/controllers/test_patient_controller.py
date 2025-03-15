@@ -1,4 +1,5 @@
 import pytest
+from datetime import date
 from flask import url_for
 from app.models.patient import Patient, Sex
 from app.services.patient_service import PatientService
@@ -13,21 +14,21 @@ class TestPatientController:
         class MockPatientService:
             def get_all_patients(self):
                 return [
-                    Patient(id=1, age=30, sex=Sex.MALE),
-                    Patient(id=2, age=45, sex=Sex.FEMALE)
+                    Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE),
+                    Patient(id=2, birth_date=date(1975, 5, 20), sex=Sex.FEMALE)
                 ]
             
             def get_patient_by_id(self, patient_id):
                 if patient_id == 1:
-                    return Patient(id=1, age=30, sex=Sex.MALE)
+                    return Patient(id=1, birth_date=date(1990, 1, 15), sex=Sex.MALE)
                 if patient_id == 2:
-                    return Patient(id=2, age=45, sex=Sex.FEMALE)
+                    return Patient(id=2, birth_date=date(1975, 5, 20), sex=Sex.FEMALE)
                 return None
             
             def create_patient(self, patient_data):
                 patient = Patient(
                     id=3,
-                    age=patient_data.get('age'),
+                    birth_date=patient_data.get('birth_date'),
                     sex=patient_data.get('sex')
                 )
                 return patient
@@ -38,7 +39,7 @@ class TestPatientController:
                 
                 patient = Patient(
                     id=patient_id,
-                    age=patient_data.get('age', 30),
+                    birth_date=patient_data.get('birth_date', date(1990, 1, 15)),
                     sex=patient_data.get('sex', Sex.MALE)
                 )
                 return patient
@@ -59,14 +60,14 @@ class TestPatientController:
         assert response.status_code == 200
         assert b'Patients List' in response.data
         assert b'ID' in response.data
-        assert b'Age' in response.data
+        assert b'Birth Date' in response.data
         assert b'Sex' in response.data
     
     def test_index_post_valid(self, client, mock_patient_service):
         # Test POST request to index with valid data
         response = client.post(
             url_for('patients.index'), 
-            data={'age': '25', 'sex': 'MALE'}
+            data={'birth_date': '1995-10-05', 'sex': 'MALE'}
         )
         
         # Assertions
@@ -78,17 +79,17 @@ class TestPatientController:
         # Test POST request to index with invalid data
         response = client.post(
             url_for('patients.index'), 
-            data={'age': 'invalid', 'sex': 'Male'}
+            data={'birth_date': 'invalid-date', 'sex': 'Male'}
         )
         
         # Assertions
         assert response.status_code == 400
-        assert b'Age must be a positive number' in response.data
+        assert b'Birth date must be in YYYY-MM-DD format' in response.data
         
         # Test with missing data
         response = client.post(
             url_for('patients.index'), 
-            data={'age': '25'}  # Missing sex
+            data={'birth_date': '1995-10-05'}  # Missing sex
         )
         
         # Assertions
@@ -102,7 +103,7 @@ class TestPatientController:
         # Assertions
         assert response.status_code == 200
         assert b'Add New Patient' in response.data
-        assert b'Age' in response.data
+        assert b'Birth Date' in response.data
         assert b'Sex' in response.data
     
     def test_show_valid(self, client, mock_patient_service):
@@ -112,6 +113,7 @@ class TestPatientController:
         # Assertions
         assert response.status_code == 200
         assert b'Patient Details' in response.data
+        assert b'Birth Date' in response.data
         assert b'Age' in response.data
         assert b'Sex' in response.data
     
@@ -131,14 +133,14 @@ class TestPatientController:
         # Assertions
         assert response.status_code == 200
         assert b'Edit Patient' in response.data
-        assert b'Age' in response.data
+        assert b'Birth Date' in response.data
         assert b'Sex' in response.data
     
     def test_update_valid(self, client, mock_patient_service):
         # Test POST request to update with valid data
         response = client.post(
             url_for('patients.update', id=1), 
-            data={'age': '35', 'sex': 'FEMALE'}
+            data={'birth_date': '1990-01-16', 'sex': 'FEMALE'}
         )
         
         # Assertions
@@ -150,18 +152,18 @@ class TestPatientController:
         # Test POST request to update with invalid data
         response = client.post(
             url_for('patients.update', id=1), 
-            data={'age': '-5', 'sex': 'FEMALE'}
+            data={'birth_date': 'not-a-date', 'sex': 'FEMALE'}
         )
         
         # Assertions
         assert response.status_code == 400
-        assert b'Age must be a positive number' in response.data
+        assert b'Birth date must be in YYYY-MM-DD format' in response.data
     
     def test_update_invalid_id(self, client, mock_patient_service):
         # Test POST request to update with invalid ID
         response = client.post(
             url_for('patients.update', id=999), 
-            data={'age': '35', 'sex': 'Female'}
+            data={'birth_date': '1990-01-16', 'sex': 'Female'}
         )
         
         # Assertions

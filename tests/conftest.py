@@ -2,7 +2,7 @@ import pytest
 import os
 from app import create_app, db
 from app.config import Config
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from app.models.patient import Patient, Sex
 from app.models.image import Image, EyeSide, ImageQualityScore, AnatomyScore
 
@@ -29,9 +29,9 @@ def app():
         
         # Add sample data
         sample_patients = [
-            Patient(age=30, sex=Sex.MALE),
-            Patient(age=45, sex=Sex.FEMALE),
-            Patient(age=25, sex=Sex.OTHER)
+            Patient(birth_date=date(1990, 1, 15), sex=Sex.MALE),
+            Patient(birth_date=date(1975, 5, 20), sex=Sex.FEMALE),
+            Patient(birth_date=date(1995, 10, 5), sex=Sex.OTHER)
         ]
         db.session.add_all(sample_patients)
         db.session.commit()

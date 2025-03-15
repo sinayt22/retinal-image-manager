@@ -18,6 +18,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Birth Date</th>
                     <th>Age</th>
                     <th>Sex</th>
                     <th>Created</th>
@@ -28,6 +29,7 @@
                 {% for patient in patients %}
                 <tr>
                     <td>{{ patient.id }}</td>
+                    <td>{{ patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else 'Unknown' }}</td>
                     <td>{{ patient.age }}</td>
                     <td>
                         {% if patient.sex.value == 'MALE' %}Male

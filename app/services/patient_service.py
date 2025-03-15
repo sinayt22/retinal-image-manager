@@ -10,7 +10,7 @@ class PatientService:
 
     def create_patient(self, patient_data):
         patient = Patient(
-            age = patient_data.get('age'),
+            birth_date = patient_data.get('birth_date'),
             sex = patient_data.get('sex')
         )
         db.session.add(patient)
@@ -22,8 +22,8 @@ class PatientService:
         if not patient:
             raise ValueError(f"Patient with ID {patient} not found")
         
-        if 'age' in patient_data:
-            patient.age = patient_data['age']
+        if 'birth_date' in patient_data:
+            patient.birth_date = patient_data['birth_date']
         if 'sex' in patient_data:
             patient.sex = patient_data['sex']
         

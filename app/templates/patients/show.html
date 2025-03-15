@@ -28,8 +28,12 @@
             <div class="col-md-9">{{ patient.id }}</div>
         </div>
         <div class="row mb-3">
+            <div class="col-md-3 fw-bold">Birth Date:</div>
+            <div class="col-md-9">{{ patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else 'Unknown' }}</div>
+        </div>
+        <div class="row mb-3">
             <div class="col-md-3 fw-bold">Age:</div>
-            <div class="col-md-9">{{ patient.age }}</div>
+            <div class="col-md-9">{{ patient.age }} years</div>
         </div>
         <div class="row mb-3">
             <div class="col-md-3 fw-bold">Sex:</div>
