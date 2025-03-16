@@ -1,3 +1,4 @@
+import os
 from flask import Flask, redirect, url_for
 from app.config import Config
 from flask_sqlalchemy import SQLAlchemy
@@ -43,11 +44,28 @@ def create_app(config_class=Config):
             db.create_all()
             print("Database has been reset!")
 
+            clean_upload_directory(app)
 
     setup_upload_destination(app)
 
     return app
 
+
+
+def clean_upload_directory(app):
+    """Remove all files and subdirectories from the upload folder."""
+    try:
+        import shutil
+        if os.path.exists(app.config['UPLOAD_FOLDER']):
+            for file in os.listdir(app.config['UPLOAD_FOLDER']):
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            print("All uploaded files have been removed!")
+    except Exception as e:
+        print(f"Error cleaning upload directory: {e}")
 
 
 def setup_upload_destination(app):
@@ -76,6 +94,7 @@ def setup_upload_destination(app):
             if os.name == 'posix':
                 if not os.path.islink(static_images):
                     os.symlink(upload_folder, static_images)
+                    print(f"Created a symlink at {static_images}")
             elif os.name == 'nt':
                 import ctypes
                 if not os.path.islink(static_images):
