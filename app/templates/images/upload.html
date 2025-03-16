@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Image{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1>Upload Image for Patient #{{ patient.id }}</h1>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('patients.show', id=patient.id) }}" class="btn btn-secondary">Back to Patient</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2>Image Upload</h2>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('images.upload', patient_id=patient.id) }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="image_file" class="form-label">Image File</label>
+                        <input type="file" class="form-control" id="image_file" name="image_file" accept="image/*" required>
+                        <div class="form-text">Only image files are accepted (JPG, PNG, etc.)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="eye_side" class="form-label">Eye Side</label>
+                        <select class="form-select" id="eye_side" name="eye_side" required>
+                            <option value="" selected disabled>Select eye side</option>
+                            <option value="LEFT">Left Eye</option>
+                            <option value="RIGHT">Right Eye</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quality_score" class="form-label">Quality Score</label>
+                        <select class="form-select" id="quality_score" name="quality_score">
+                            <option value="" selected disabled>Select quality score</option>
+                            <option value="LOW">Low</option>
+                            <option value="ACCEPTABLE">Acceptable</option>
+                            <option value="HIGH">High</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="anatomy_score" class="form-label">Anatomy Score</label>
+                        <select class="form-select" id="anatomy_score" name="anatomy_score">
+                            <option value="" selected disabled>Select anatomy score</option>
+                            <option value="POOR">Poor</option>
+                            <option value="ACCEPTABLE">Acceptable</option>
+                            <option value="GOOD">Good</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="site" class="form-label">Site</label>
+                        <input type="text" class="form-control" id="site" name="site" placeholder="e.g., Main Clinic, Branch Office, etc.">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="acquisition_date" class="form-label">Acquisition Date</label>
+                        <input type="date" class="form-control" id="acquisition_date" name="acquisition_date">
+                        <div class="form-text">Leave blank to use current date</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('patients.show', id=patient.id) }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Upload Image</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

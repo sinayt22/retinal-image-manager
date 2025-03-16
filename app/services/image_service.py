@@ -32,6 +32,7 @@ class ImageService:
         """
         # Handle file upload if provided
         image_path = None
+        is_io = None
         if image_file:
             filename = secure_filename(image_file.filename)
             # Create a unique filename using timestamp
@@ -42,6 +43,7 @@ class ImageService:
             upload_folder = current_app.config['UPLOAD_FOLDER']
             file_path = os.path.join(upload_folder, unique_filename)
             image_file.save(file_path)
+            is_io = is_over_illuminated(file_path)
             
             # Store the relative path
             image_path = unique_filename
@@ -53,7 +55,7 @@ class ImageService:
             quality_score=image_data.get('quality_score'),
             anatomy_score=image_data.get('anatomy_score'),
             site=image_data.get('site'),
-            over_illuminated=image_data.get('over_illuminated', False),
+            over_illuminated=is_io if is_io is not None else False,
             image_path=image_path or image_data.get('image_path'),
             acquisition_date=image_data.get('acquisition_date', datetime.now(timezone.utc))
         )
@@ -96,3 +98,24 @@ class ImageService:
         db.session.delete(image)
         db.session.commit()
         return True
+    
+def is_over_illuminated(image_path, threshold=0.9):
+    import numpy as np
+    from PIL import Image
+
+    PX_MAX_VALUE = 255.0
+    # Load image
+    img = Image.open(image_path)
+    img_array = np.array(img)
+
+    # Convert to luminance using perceptual weights
+    # These weights reflect human perception of brightness
+    luminance = (0.2126 * img_array[:, :, 0] +
+                 0.7152 * img_array[:, :, 1] +
+                 0.0722 * img_array[:, :, 2]) / PX_MAX_VALUE
+
+    # Identify pixels with luminance above threshold
+    overexposed_mask = luminance > threshold
+
+    # The image is over illuminated if it has pixels above the threshold
+    return np.sum(overexposed_mask) > 0

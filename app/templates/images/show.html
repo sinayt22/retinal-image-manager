@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Image Details{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h1>Image Details</h1>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('images.edit', image_id=image.id) }}" class="btn btn-warning">Edit</a>
+            <form action="{{ url_for('images.delete', image_id=image.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this image?');">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+            <a href="{{ url_for('patients.show', id=patient.id) }}" class="btn btn-secondary">Back to Patient</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Image</h3>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='uploads/images/' + image.image_path) }}" class="img-fluid" alt="Patient Image">
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Image Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Patient:</div>
+                    <div class="col-md-8">
+                        <a href="{{ url_for('patients.show', id=patient.id) }}">Patient #{{ patient.id }}</a>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Eye Side:</div>
+                    <div class="col-md-8">{{ image.eye_side.value }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Quality Score:</div>
+                    <div class="col-md-8">
+                        {% if image.quality_score %}
+                            {% if image.quality_score.value == 'LOW' %}
+                                <span class="badge bg-danger">Low</span>
+                            {% elif image.quality_score.value == 'ACCEPTABLE' %}
+                                <span class="badge bg-warning text-dark">Acceptable</span>
+                            {% elif image.quality_score.value == 'HIGH' %}
+                                <span class="badge bg-success">High</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Not rated</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Anatomy Score:</div>
+                    <div class="col-md-8">
+                        {% if image.anatomy_score %}
+                            {% if image.anatomy_score.value == 'POOR' %}
+                                <span class="badge bg-danger">Poor</span>
+                            {% elif image.anatomy_score.value == 'ACCEPTABLE' %}
+                                <span class="badge bg-warning text-dark">Acceptable</span>
+                            {% elif image.anatomy_score.value == 'GOOD' %}
+                                <span class="badge bg-success">Good</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Not rated</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Site:</div>
+                    <div class="col-md-8">{{ image.site or 'Not specified' }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Over Illuminated:</div>
+                    <div class="col-md-8">
+                        {% if image.over_illuminated %}
+                            <span class="badge bg-warning text-dark">Yes</span>
+                        {% else %}
+                            <span class="badge bg-success">No</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Acquisition Date:</div>
+                    <div class="col-md-8">{{ image.acquisition_date.strftime('%Y-%m-%d') if image.acquisition_date else 'Not specified' }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Uploaded:</div>
+                    <div class="col-md-8">{{ image.created_at.strftime('%Y-%m-%d %H:%M') if image.created_at else 'Unknown' }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 fw-bold">Last Updated:</div>
+                    <div class="col-md-8">{{ image.modified_at.strftime('%Y-%m-%d %H:%M') if image.modified_at else 'Unknown' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

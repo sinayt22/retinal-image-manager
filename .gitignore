@@ -49,4 +49,5 @@ uploads/
 logs/
 
 #tests
+htmlcov
 .coverage

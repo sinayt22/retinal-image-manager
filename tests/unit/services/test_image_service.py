@@ -53,7 +53,6 @@ class TestImageService:
             
             def save(self, path):
                 self.saved_path = path
-                # Create an empty file
                 with open(path, 'w') as f:
                     f.write("test")
         
@@ -72,6 +71,9 @@ class TestImageService:
             config = MockConfig()
         
         monkeypatch.setattr('app.services.image_service.current_app', MockApp())
+        
+        # Mock the is_over_illuminated function since we can't test with real images
+        monkeypatch.setattr('app.services.image_service.is_over_illuminated', lambda path, threshold=0.9: False)
         
         return MockFile()
     
@@ -221,6 +223,9 @@ class TestImageService:
         
         # Check if image path was set correctly
         assert image.image_path == "20250301120000_test_image.jpg"
+        
+        # Check if over_illuminated was set correctly
+        assert image.over_illuminated is False  # Since we mocked is_over_illuminated to return False
         
         # Check if session methods were called
         assert len(db_session.added) == 1
