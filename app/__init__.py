@@ -32,9 +32,20 @@ def create_app(config_class=Config):
     def index():
         return redirect(url_for('patients.index'))
 
+
+    @app.cli.command("reset-db")
+    def reset_db():
+        """Reset all data in the database while preserving the schema."""
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            print("Database has been reset!")
+
+            
     setup_upload_destination(app)
 
     return app
+
 
 
 def setup_upload_destination(app):
