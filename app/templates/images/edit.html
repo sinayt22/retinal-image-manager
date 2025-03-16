@@ -2,13 +2,29 @@
 
 {% block title %}Edit Image{% endblock %}
 
+{% block extra_css %}
+<style>
+    #customSiteFields {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row mb-3">
     <div class="col">
-        <h1>Edit Image</h1>
+        <h1>Edit Image for Patient #{{ patient.id }}</h1>
+        <p class="text-muted">
+            Patient: {{ patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else 'Unknown' }} 
+            ({{ patient.age }} years, 
+            {% if patient.sex.value == 'MALE' %}Male{% elif patient.sex.value == 'FEMALE' %}Female{% else %}Other{% endif %})
+        </p>
     </div>
     <div class="col-auto">
-        <a href="{{ url_for('images.show', image_id=image.id) }}" class="btn btn-secondary">Back to Image</a>
+        <div class="btn-group">
+            <a href="{{ url_for('images.show', image_id=image.id) }}" class="btn btn-secondary">Back to Image</a>
+            <a href="{{ url_for('patients.show', id=patient.id) }}" class="btn btn-primary">Back to Patient</a>
+        </div>
     </div>
 </div>
 
@@ -60,13 +76,34 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="site" class="form-label">Site</label>
-                        <input type="text" class="form-control" id="site" name="site" value="{{ image.site or '' }}" placeholder="e.g., Main Clinic, Branch Office, etc.">
+                        <label for="site_id" class="form-label">Site</label>
+                        <select class="form-select" id="site_id" name="site_id">
+                            <option value="" {% if not image.site_id %}selected{% endif %}>None</option>
+                            {% for site in sites %}
+                            <option value="{{ site.id }}" {% if image.site_id == site.id %}selected{% endif %}>
+                                {{ site.name }}{% if site.location %} ({{ site.location }}){% endif %}
+                            </option>
+                            {% endfor %}
+                            <option value="custom">Add New Site...</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customSiteFields">
+                        <div class="mb-3">
+                            <label for="site_name" class="form-label">New Site Name</label>
+                            <input type="text" class="form-control" id="site_name" name="site_name" placeholder="Enter new site name">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="site_location" class="form-label">Site Location (Optional)</label>
+                            <input type="text" class="form-control" id="site_location" name="site_location" placeholder="City, State, Country">
+                        </div>
                     </div>
                     
                     <div class="mb-3">
                         <label for="acquisition_date" class="form-label">Acquisition Date</label>
-                        <input type="date" class="form-control" id="acquisition_date" name="acquisition_date" value="{{ image.acquisition_date.strftime('%Y-%m-%d') if image.acquisition_date else '' }}">
+                        <input type="date" class="form-control" id="acquisition_date" name="acquisition_date" 
+                               value="{{ image.acquisition_date.strftime('%Y-%m-%d') if image.acquisition_date else '' }}">
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -78,4 +115,32 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide custom site fields when option changes
+        const siteSelect = document.getElementById('site_id');
+        const customFields = document.getElementById('customSiteFields');
+        const siteNameInput = document.getElementById('site_name');
+        
+        // Initial check
+        if (siteSelect.value === 'custom') {
+            customFields.style.display = 'block';
+            siteNameInput.setAttribute('required', 'required');
+        }
+        
+        // Change event
+        siteSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customFields.style.display = 'block';
+                siteNameInput.setAttribute('required', 'required');
+            } else {
+                customFields.style.display = 'none';
+                siteNameInput.removeAttribute('required');
+            }
+        });
+    });
+</script>
 {% endblock %}

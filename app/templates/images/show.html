@@ -84,7 +84,18 @@
                 
                 <div class="row mb-3">
                     <div class="col-md-4 fw-bold">Site:</div>
-                    <div class="col-md-8">{{ image.site or 'Not specified' }}</div>
+                    <div class="col-md-8">
+                        {% if image.site_data %}
+                            <a href="{{ url_for('sites.show', id=image.site_data.id) }}">
+                                {{ image.site_data.name }}
+                                {% if image.site_data.location %}
+                                    ({{ image.site_data.location }})
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Not specified</span>
+                        {% endif %}
+                    </div>
                 </div>
                 
                 <div class="row mb-3">

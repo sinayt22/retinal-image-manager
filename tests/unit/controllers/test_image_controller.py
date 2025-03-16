@@ -26,7 +26,7 @@ class TestImageController:
                 eye_side=EyeSide.LEFT,
                 quality_score=ImageQualityScore.HIGH,
                 anatomy_score=AnatomyScore.GOOD,
-                site="Main Clinic",
+                site_id=1,
                 over_illuminated=False,
                 image_path="sample1.jpg",
                 acquisition_date=datetime(2025, 3, 1, tzinfo=timezone.utc)
@@ -37,7 +37,7 @@ class TestImageController:
                 eye_side=EyeSide.RIGHT,
                 quality_score=ImageQualityScore.ACCEPTABLE,
                 anatomy_score=AnatomyScore.ACCEPTABLE,
-                site="Branch Office",
+                site_id=2,
                 over_illuminated=True,
                 image_path="sample2.jpg",
                 acquisition_date=datetime(2025, 3, 2, tzinfo=timezone.utc)
@@ -65,7 +65,7 @@ class TestImageController:
                     eye_side=image_data.get('eye_side'),
                     quality_score=image_data.get('quality_score'),
                     anatomy_score=image_data.get('anatomy_score'),
-                    site=image_data.get('site'),
+                    site_id=image_data.get('site_id'),
                     over_illuminated=image_data.get('over_illuminated', False),
                     image_path='new_image.jpg' if image_file else image_data.get('image_path'),
                     acquisition_date=image_data.get('acquisition_date')
@@ -152,7 +152,6 @@ class TestImageController:
                     'eye_side': 'LEFT',
                     'quality_score': 'HIGH',
                     'anatomy_score': 'GOOD',
-                    'site': 'Test Clinic',
                     'acquisition_date': '2025-03-01'
                 }
         
@@ -216,7 +215,6 @@ class TestImageController:
         assert response.status_code == 200
         assert b'Image Details' in response.data
         assert b'LEFT' in response.data
-        assert b'Main Clinic' in response.data
     
     def test_show_invalid(self, client, mock_services):
         """Test GET request to show with invalid image ID."""

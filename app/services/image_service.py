@@ -4,11 +4,15 @@ import os
 from flask import current_app
 from app import db
 from app.models.image import Image
+from app.services.site_service import SiteService
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 
 class ImageService:
+    def __init__(self):
+        self.site_service = SiteService()
+    
     def get_patient_images(self, patient_id):
         return (
             Image.query.filter_by(patient_id=patient_id)
@@ -48,13 +52,24 @@ class ImageService:
             # Store the relative path
             image_path = unique_filename
         
+        # Handle site - get or create by name
+        site_id = None
+        if 'site_id' in image_data:
+            site_id = image_data['site_id']
+        elif image_data.get('site_name'):
+            site = self.site_service.find_or_create_site(
+                name=image_data['site_name'], 
+                location=image_data.get('site_location')
+            )
+            site_id = site.id
+        
         # Create image record
         image = Image(
             patient_id=image_data.get('patient_id'),
             eye_side=image_data.get('eye_side'),
             quality_score=image_data.get('quality_score'),
             anatomy_score=image_data.get('anatomy_score'),
-            site=image_data.get('site'),
+            site_id=site_id,
             over_illuminated=is_io if is_io is not None else False,
             image_path=image_path or image_data.get('image_path'),
             acquisition_date=image_data.get('acquisition_date', datetime.now(timezone.utc))
@@ -75,8 +90,17 @@ class ImageService:
             image.quality_score = image_data['quality_score']
         if 'anatomy_score' in image_data:
             image.anatomy_score = image_data['anatomy_score']
-        if 'site' in image_data:
-            image.site = image_data['site']
+            
+        # Handle site update
+        if 'site_id' in image_data:
+            image.site_id = image_data['site_id']
+        elif 'site_name' in image_data and image_data['site_name']:
+            site = self.site_service.find_or_create_site(
+                name=image_data['site_name'], 
+                location=image_data.get('site_location')
+            )
+            image.site_id = site.id
+            
         if 'over_illuminated' in image_data:
             image.over_illuminated = image_data['over_illuminated']
         if 'acquisition_date' in image_data:

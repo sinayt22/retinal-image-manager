@@ -108,7 +108,13 @@
                                 
                                 <div class="mb-1">
                                     <strong>Site:</strong> 
-                                    <span class="text-muted">{{ image.site or 'Not specified' }}</span>
+                                    <span class="text-muted">
+                                        {% if image.site_data %}
+                                            {{ image.site_data.name }}
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 
                                 {% if image.over_illuminated %}

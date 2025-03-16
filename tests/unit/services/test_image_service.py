@@ -239,7 +239,7 @@ class TestImageService:
             eye_side=EyeSide.LEFT, 
             quality_score=ImageQualityScore.ACCEPTABLE, 
             anatomy_score=AnatomyScore.ACCEPTABLE,
-            site=None,
+            site_id=None,
             over_illuminated=False,
             image_path="image1.jpg"
         )
@@ -255,7 +255,7 @@ class TestImageService:
         update_data = {
             'quality_score': ImageQualityScore.HIGH,
             'anatomy_score': AnatomyScore.GOOD,
-            'site': 'Updated Clinic',
+            'site_id': 2,
             'over_illuminated': True
         }
         
@@ -266,7 +266,7 @@ class TestImageService:
         assert updated_image is not None
         assert updated_image.quality_score == ImageQualityScore.HIGH
         assert updated_image.anatomy_score == AnatomyScore.GOOD
-        assert updated_image.site == 'Updated Clinic'
+        assert updated_image.site_id == 2
         assert updated_image.over_illuminated is True
         assert db_session.committed is True
         

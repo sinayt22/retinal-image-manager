@@ -15,7 +15,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     
     with app.app_context():
-        from app.models import patient, image
+        from app.models import patient, image, site
 
 
     from app.controllers.web.patient_controller import patient_bp
@@ -23,6 +23,10 @@ def create_app(config_class=Config):
 
     from app.controllers.web.image_controller import image_bp
     app.register_blueprint(image_bp, url_prefix='/images')
+    
+    from app.controllers.web.site_controller import site_bp
+    app.register_blueprint(site_bp, url_prefix='/sites')
+
 
     @app.route('/')
     def index():
