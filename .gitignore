@@ -47,6 +47,7 @@ Thumbs.db
 # Project specific
 uploads/
 logs/
+import.log
 
 #tests
 htmlcov
