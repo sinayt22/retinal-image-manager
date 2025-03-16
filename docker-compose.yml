@@ -1,0 +1,53 @@
+services:
+  web:
+    build: .
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    command: /app/entrypoint.sh
+  
+  test:
+    profiles: ["tools"]
+    build: .
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance
+    env_file:
+      - .env
+    entrypoint: /app/run_tests.sh
+
+  import:
+    profiles: ["tools"]
+    build: .
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance
+    env_file:
+      - .env
+    entrypoint: python
+    command: scripts/import_script.py --randomize --num-sites 10 --num-patients 50
+
+  reset_db:
+    profiles: ["tools"]
+    build: .
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance
+    env_file:
+      - .env
+    entrypoint: flask
+    command: reset-db
+
+  bash:
+    profiles: ["tools"]
+    build: .
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance
+    env_file:
+      - .env
+    entrypoint: bash
