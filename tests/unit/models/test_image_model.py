@@ -13,7 +13,7 @@ class TestImageModel:
             eye_side=EyeSide.LEFT,
             quality_score=ImageQualityScore.HIGH,
             anatomy_score=AnatomyScore.GOOD,
-            site="Main Clinic",
+            site_id=1,
             over_illuminated=False,
             image_path="test_image.jpg",
             acquisition_date=datetime(2025, 3, 1, tzinfo=timezone.utc),
@@ -28,7 +28,7 @@ class TestImageModel:
         assert sample_image.eye_side == EyeSide.LEFT
         assert sample_image.quality_score == ImageQualityScore.HIGH
         assert sample_image.anatomy_score == AnatomyScore.GOOD
-        assert sample_image.site == "Main Clinic"
+        assert sample_image.site_id == 1
         assert sample_image.over_illuminated is False
         assert sample_image.image_path == "test_image.jpg"
         assert sample_image.acquisition_date.year == 2025
@@ -48,7 +48,7 @@ class TestImageModel:
         assert image_dict["eye_side"] == "LEFT"
         assert image_dict["quality_score"] == "HIGH"
         assert image_dict["anatomy_score"] == "GOOD"
-        assert image_dict["site"] == "Main Clinic"
+        assert image_dict["site_id"] == 1
         assert image_dict["over_illumination"] is False
         assert image_dict["image_path"] == "test_image.jpg"
         assert "acquisition_date" in image_dict

@@ -43,7 +43,7 @@ def app():
                 eye_side=EyeSide.LEFT,
                 quality_score=ImageQualityScore.HIGH,
                 anatomy_score=AnatomyScore.GOOD,
-                site="Main Clinic",
+                site_id=1,
                 over_illuminated=False,
                 image_path="sample1.jpg",
                 acquisition_date=datetime.now(timezone.utc)
@@ -53,7 +53,7 @@ def app():
                 eye_side=EyeSide.RIGHT,
                 quality_score=ImageQualityScore.ACCEPTABLE,
                 anatomy_score=AnatomyScore.ACCEPTABLE,
-                site="Main Clinic",
+                site_id=1,
                 over_illuminated=True,
                 image_path="sample2.jpg",
                 acquisition_date=datetime.now(timezone.utc)

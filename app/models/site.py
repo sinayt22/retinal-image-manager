@@ -9,17 +9,17 @@ class Site(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True)
     location = Column(String(255), nullable=True)
-    created_at = Column(db.Datetime, default=datetime.now(timezone.utc))
-    modified_at = Column(db.DateTime, 
-                         default=datetime.now(timezone.utc), 
-                         onupdate=datetime.now(timezone.utc)
-                         )
-    
+    created_at = Column(db.DateTime, default=datetime.now(timezone.utc))
+    modified_at = Column(db.DateTime,
+        default=datetime.now(timezone.utc),
+        onupdate=datetime.now(timezone.utc),
+    )
+
     images = db.relationship("Image", backref="site_data", lazy=True)
 
     def __repr__(self):
-        return f"<Site {self.id}: {self.name}"
-    
+        return f"<Site {self.id}: {self.name}>"
+
     def to_dict(self):
         return {
             "id": self.id,
