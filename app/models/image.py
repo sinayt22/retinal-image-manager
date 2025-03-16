@@ -27,7 +27,7 @@ class Image(db.Model):
     eye_side = Column(sqlalchemy.Enum(EyeSide), nullable=False)
     quality_score = Column(sqlalchemy.Enum(ImageQualityScore), nullable=True)
     anatomy_score = Column(sqlalchemy.Enum(AnatomyScore), nullable=True)
-    site = Column(String(255), nullable=True)
+    site_id = Column(Integer, ForeignKey("sites.id"), nullable=True)
     over_illuminated = Column(Boolean, default=False)
     image_path = Column(String(255), nullable=False)
     acquisition_date = Column(sqlalchemy.DateTime, default=datetime.now(timezone.utc), nullable=True)
@@ -45,7 +45,9 @@ class Image(db.Model):
             'eye_side': self.eye_side.value if self.eye_side else None,
             'quality_score': self.quality_score.value if self.quality_score else None,
             'anatomy_score': self.anatomy_score.value if self.anatomy_score else None,
-            'site': self.site,
+            'site_id': self.site_id,
+            'site_name': self.site_data.name if self.site_data else None,
+            'site_location': self.site_data.location if self.site_data else None,
             'over_illumination': self.over_illuminated,
             'image_path': self.image_path,
             'acquisition_date': self.acquisition_date.isoformat() if self.acquisition_date else None,
