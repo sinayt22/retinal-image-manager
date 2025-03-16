@@ -13,11 +13,13 @@ def index():
     """Display the main dashboard."""
     site_stats = statistics_service.get_sites_statistics()
     image_stats = statistics_service.get_image_quality_statistics()
+    global_stats = statistics_service.get_global_statistics()
     
     return render_template(
         'dashboard/index.html', 
         site_stats=site_stats,
-        image_stats=image_stats
+        image_stats=image_stats,
+        global_stats=global_stats
     )
 
 @dashboard_bp.route('/api/site-statistics', methods=['GET'])

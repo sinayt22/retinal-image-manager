@@ -132,3 +132,36 @@ class StatisticsService:
             "anatomy": anatomy_stats,
             "illumination": illumination_stats,
         }
+    
+    def get_global_statistics(self):
+        """Get global statistics across all sites."""
+        total_patients = 0
+        available_patients = 0
+        
+        sites = Site.query.all()
+        total_sites = len(sites)
+
+        for site in sites:
+            patients_with_images = (
+                db.session.query(Patient.id)
+                .distinct()
+                .join(Image, Patient.id == Image.patient_id)
+                .filter(Image.site_id == site.id)
+                .all()
+            )
+            
+            site_patients = [p[0] for p in patients_with_images]
+            total_patients += len(site_patients)
+            
+            for patient_id in site_patients:
+                if self._is_patient_available(patient_id, site.id):
+                    available_patients += 1
+        
+        readiness_percentage = (available_patients / total_patients * 100) if total_patients > 0 else 0
+        
+        return {
+            "total_sites": total_sites,
+            "total_patients": total_patients,
+            "available_patients": available_patients,
+            "readiness_percentage": round(readiness_percentage, 1)
+        }

@@ -61,7 +61,7 @@
     <div class="card stat-card bg-gradient-primary text-white">
       <div class="card-body">
         <h5 class="card-title">Total Sites</h5>
-        <h2>{{ site_stats|length }}</h2>
+        <h2>{{ global_stats.total_sites }}</h2>
         <p class="mb-0">Collection sites</p>
       </div>
     </div>
@@ -71,11 +71,7 @@
     <div class="card stat-card bg-gradient-success text-white">
       <div class="card-body">
         <h5 class="card-title">Total Patients</h5>
-        {% set total_patients = 0 %}
-        {% for site in site_stats %}
-          {% set total_patients = total_patients + site.total_patients %}
-        {% endfor %}
-        <h2>{{ total_patients }}</h2>
+        <h2>{{  global_stats.total_patients }}</h2>
         <p class="mb-0">Across all sites</p>
       </div>
     </div>
@@ -85,11 +81,7 @@
     <div class="card stat-card bg-gradient-warning text-white">
       <div class="card-body">
         <h5 class="card-title">AI-Ready Patients</h5>
-        {% set available_patients = 0 %}
-        {% for site in site_stats %}
-          {% set available_patients = available_patients + site.available_for_ai %}
-        {% endfor %}
-        <h2>{{ available_patients }}</h2>
+        <h2>{{ global_stats.available_patients }}</h2>
         <p class="mb-0">Patients ready for AI</p>
       </div>
     </div>
@@ -99,19 +91,11 @@
     <div class="card stat-card bg-gradient-danger text-white">
       <div class="card-body">
         <h5 class="card-title">Overall Readiness</h5>
-        {% set total_patients = 0 %}
-        {% set available_patients = 0 %}
-        {% for site in site_stats %}
-          {% set total_patients = total_patients + site.total_patients %}
-          {% set available_patients = available_patients + site.available_for_ai %}
-        {% endfor %}
-        {% set readiness_percentage = (available_patients / total_patients * 100) if total_patients > 0 else 0 %}
-        <h2>{{ "%.1f"|format(readiness_percentage) }}%</h2>
+        <h2>{{ "%.1f"|format(global_stats.readiness_percentage) }}%</h2>
         <p class="mb-0">Average AI readiness</p>
       </div>
     </div>
   </div>
-</div>
 
 <!-- Main Chart: Patient Availability per Site -->
 <div class="card mb-4">
