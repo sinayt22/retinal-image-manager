@@ -27,6 +27,8 @@ def create_app(config_class=Config):
     from app.controllers.web.site_controller import site_bp
     app.register_blueprint(site_bp, url_prefix='/sites')
 
+    from app.controllers.web.dashboard_controller import dashboard_bp
+    app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 
     @app.route('/')
     def index():
@@ -41,7 +43,7 @@ def create_app(config_class=Config):
             db.create_all()
             print("Database has been reset!")
 
-            
+
     setup_upload_destination(app)
 
     return app

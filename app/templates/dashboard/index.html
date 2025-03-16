@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}AI Readiness Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .stat-card {
+    border-radius: 0.5rem;
+    transition: transform 0.3s;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+  
+  .chart-container {
+    height: 400px;
+    margin-bottom: 2rem;
+  }
+  
+  .site-info {
+    font-size: 0.9rem;
+  }
+  
+  .progress {
+    height: 1.5rem;
+  }
+  
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  }
+  
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+  
+  .bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  }
+  
+  .bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col">
+    <h1>AI Readiness Dashboard</h1>
+    <p class="text-muted">
+      This dashboard displays statistics on patient data quality and AI readiness across sites.
+    </p>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card bg-gradient-primary text-white">
+      <div class="card-body">
+        <h5 class="card-title">Total Sites</h5>
+        <h2>{{ site_stats|length }}</h2>
+        <p class="mb-0">Collection sites</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card stat-card bg-gradient-success text-white">
+      <div class="card-body">
+        <h5 class="card-title">Total Patients</h5>
+        {% set total_patients = 0 %}
+        {% for site in site_stats %}
+          {% set total_patients = total_patients + site.total_patients %}
+        {% endfor %}
+        <h2>{{ total_patients }}</h2>
+        <p class="mb-0">Across all sites</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card stat-card bg-gradient-warning text-white">
+      <div class="card-body">
+        <h5 class="card-title">AI-Ready Patients</h5>
+        {% set available_patients = 0 %}
+        {% for site in site_stats %}
+          {% set available_patients = available_patients + site.available_for_ai %}
+        {% endfor %}
+        <h2>{{ available_patients }}</h2>
+        <p class="mb-0">Patients ready for AI</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card stat-card bg-gradient-danger text-white">
+      <div class="card-body">
+        <h5 class="card-title">Overall Readiness</h5>
+        {% set total_patients = 0 %}
+        {% set available_patients = 0 %}
+        {% for site in site_stats %}
+          {% set total_patients = total_patients + site.total_patients %}
+          {% set available_patients = available_patients + site.available_for_ai %}
+        {% endfor %}
+        {% set readiness_percentage = (available_patients / total_patients * 100) if total_patients > 0 else 0 %}
+        <h2>{{ "%.1f"|format(readiness_percentage) }}%</h2>
+        <p class="mb-0">Average AI readiness</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Chart: Patient Availability per Site -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>AI-Ready Patients by Site</h3>
+    <p class="text-muted mb-0">
+      A patient is considered AI-ready at a site if they have at least one good quality image for each eye (left and right).
+      <br>
+      <small>
+        <i>A "good" image meets the following criteria:</i>
+        <ul class="mb-0">
+          <li>Has either HIGH or ACCEPTABLE quality score</li>
+          <li>Has either GOOD or ACCEPTABLE anatomy score</li>
+          <li>Is not over-illuminated</li>
+        </ul>
+      </small>
+    </p>
+  </div>
+  <div class="card-body">
+    <div class="chart-container">
+      <canvas id="siteAvailabilityChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Site Statistics Table -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Site Statistics</h3>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Site Name</th>
+            <th>Location</th>
+            <th>Total Patients</th>
+            <th>AI-Ready Patients</th>
+            <th>Readiness %</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for site in site_stats|sort(attribute='availability_percentage', reverse=True) %}
+          <tr>
+            <td>{{ site.name }}</td>
+            <td>{{ site.location or 'N/A' }}</td>
+            <td>{{ site.total_patients }}</td>
+            <td>{{ site.available_for_ai }}</td>
+            <td>{{ site.availability_percentage }}%</td>
+            <td>
+              {% if site.availability_percentage >= 80 %}
+                <span class="badge bg-success">Excellent</span>
+              {% elif site.availability_percentage >= 60 %}
+                <span class="badge bg-primary">Good</span>
+              {% elif site.availability_percentage >= 40 %}
+                <span class="badge bg-warning text-dark">Fair</span>
+              {% else %}
+                <span class="badge bg-danger">Poor</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Charts -->
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Image Quality Distribution</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="qualityDistributionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Anatomy Score Distribution</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="anatomyDistributionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Illumination Analysis</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="height: 300px;">
+          <canvas id="illuminationChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Prepare site data for charts
+    const siteData = {{ site_stats|tojson }};
+    const imageStats = {{ image_stats|tojson }};
+    
+    // Set up colors
+    const colors = {
+      blue: 'rgba(54, 162, 235, 0.8)',
+      green: 'rgba(75, 192, 192, 0.8)',
+      red: 'rgba(255, 99, 132, 0.8)',
+      yellow: 'rgba(255, 206, 86, 0.8)',
+      purple: 'rgba(153, 102, 255, 0.8)',
+      orange: 'rgba(255, 159, 64, 0.8)',
+      grey: 'rgba(201, 203, 207, 0.8)'
+    };
+    
+    // Site Availability Chart
+    const siteAvailabilityCtx = document.getElementById('siteAvailabilityChart').getContext('2d');
+    const siteNames = siteData.map(site => site.name);
+    const totalPatients = siteData.map(site => site.total_patients);
+    const availablePatients = siteData.map(site => site.available_for_ai);
+    
+    new Chart(siteAvailabilityCtx, {
+      type: 'bar',
+      data: {
+        labels: siteNames,
+        datasets: [
+          {
+            label: 'Total Patients',
+            data: totalPatients,
+            backgroundColor: colors.blue,
+            order: 2
+          },
+          {
+            label: 'AI-Ready Patients',
+            data: availablePatients,
+            backgroundColor: colors.green,
+            order: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Patient AI Readiness by Site',
+            font: {
+              size: 16
+            }
+          },
+          tooltip: {
+            callbacks: {
+              afterBody: function(context) {
+                const siteIndex = context[0].dataIndex;
+                const site = siteData[siteIndex];
+                return `Readiness: ${site.availability_percentage}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Site'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Number of Patients'
+            },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+    
+    // Quality Distribution Chart
+    const qualityDistributionCtx = document.getElementById('qualityDistributionChart').getContext('2d');
+    const qualityLabels = ['High', 'Acceptable', 'Low', 'Unrated'];
+    const qualityData = [
+      imageStats.quality.HIGH,
+      imageStats.quality.ACCEPTABLE,
+      imageStats.quality.LOW,
+      imageStats.quality.UNRATED
+    ];
+    
+    new Chart(qualityDistributionCtx, {
+      type: 'doughnut',
+      data: {
+        labels: qualityLabels,
+        datasets: [{
+          data: qualityData,
+          backgroundColor: [colors.green, colors.blue, colors.red, colors.grey]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Anatomy Distribution Chart
+    const anatomyDistributionCtx = document.getElementById('anatomyDistributionChart').getContext('2d');
+    const anatomyLabels = ['Good', 'Acceptable', 'Poor', 'Unrated'];
+    const anatomyData = [
+      imageStats.anatomy.GOOD,
+      imageStats.anatomy.ACCEPTABLE,
+      imageStats.anatomy.POOR,
+      imageStats.anatomy.UNRATED
+    ];
+    
+    new Chart(anatomyDistributionCtx, {
+      type: 'doughnut',
+      data: {
+        labels: anatomyLabels,
+        datasets: [{
+          data: anatomyData,
+          backgroundColor: [colors.green, colors.blue, colors.red, colors.grey]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Illumination Chart
+    const illuminationCtx = document.getElementById('illuminationChart').getContext('2d');
+    const illuminationLabels = ['Normal', 'Over-Illuminated'];
+    const illuminationData = [
+      imageStats.illumination.NORMAL,
+      imageStats.illumination.OVER_ILLUMINATED
+    ];
+    
+    new Chart(illuminationCtx, {
+      type: 'pie',
+      data: {
+        labels: illuminationLabels,
+        datasets: [{
+          data: illuminationData,
+          backgroundColor: [colors.green, colors.yellow]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = Math.round((value / total) * 100);
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -36,7 +36,7 @@ class ImageService:
         """
         # Handle file upload if provided
         image_path = None
-        is_io = None
+        is_io = image_data.get('over_illuminated')
         if image_file:
             filename = secure_filename(image_file.filename)
             # Create a unique filename using timestamp
@@ -47,7 +47,7 @@ class ImageService:
             upload_folder = current_app.config['UPLOAD_FOLDER']
             file_path = os.path.join(upload_folder, unique_filename)
             image_file.save(file_path)
-            is_io = is_over_illuminated(file_path)
+            is_io = is_over_illuminated(file_path) if is_io is None else is_io 
             
             # Store the relative path
             image_path = unique_filename
