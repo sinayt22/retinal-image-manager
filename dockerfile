@@ -27,8 +27,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy project files
 COPY . .
 
-# Create uploads directory with proper permissions
-RUN mkdir -p uploads/images && chmod 777 uploads
+# Create uploads and static directories with proper permissions
+RUN mkdir -p uploads/images && \
+    mkdir -p app/static/uploads/images && \
+    chmod -R 777 uploads && \
+    chmod -R 777 app/static
 
 # Create an entry script
 RUN echo '#!/bin/bash\n\

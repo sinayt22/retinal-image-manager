@@ -69,37 +69,23 @@ def clean_upload_directory(app):
 
 
 def setup_upload_destination(app):
-    import os
+    """
+    Set up the upload directory structure without symlinks.
+    """
     # Create the main upload folder
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    upload_folder = os.path.abspath(app.config['UPLOAD_FOLDER'])
+    os.makedirs(upload_folder, exist_ok=True)
     
-    # Create a static symlink to the uploads folder for web access
-    static_uploads = os.path.join(app.static_folder, 'uploads')
+    # Create the static uploads folder for web access
+    static_uploads = os.path.join(app.static_folder, 'uploads/images')
     os.makedirs(static_uploads, exist_ok=True)
     
-    # Create a specific folder for images inside static/uploads
-    static_images = os.path.join(static_uploads, 'images')
-    # Create a symlink from the app's UPLOAD_FOLDER to static/uploads/images if it doesn't exist
-    upload_folder = os.path.abspath(app.config['UPLOAD_FOLDER'])
-
-    if os.path.exists(static_images):
-        # If it exists but is not a symlink, remove it to replace with symlink
-        if not os.path.islink(static_images):
-            import shutil
-            shutil.rmtree(static_images)
-
-    if not os.path.exists(static_images):
-        try:
-            # For Unix/Linux systems
-            if os.name == 'posix':
-                if not os.path.islink(static_images):
-                    os.symlink(upload_folder, static_images)
-                    print(f"Created a symlink at {static_images}")
-            elif os.name == 'nt':
-                import ctypes
-                if not os.path.islink(static_images):
-                    kdll = ctypes.windll.LoadLibrary("kernel32.dll")
-                    kdll.CreateSymbolicLinkA(static_images.encode(), upload_folder.encode(), 1)
-        except (OSError, AttributeError, PermissionError):
-            # If symlink creation fails, just ensure the directory exists
-            os.makedirs(static_images, exist_ok=True)
+    # Set permissions to ensure both Flask and Docker can write
+    try:
+        os.chmod(upload_folder, 0o777)
+        os.chmod(static_uploads, 0o777)
+    except Exception as e:
+        print(f"Warning: Could not set permissions: {e}")
+        
+    print(f"Upload folder: {upload_folder}")
+    print(f"Static images folder: {static_uploads}")

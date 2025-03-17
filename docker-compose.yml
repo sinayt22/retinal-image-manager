@@ -4,11 +4,14 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./instance:/app/instance
+      - ./app/static:/app/app/static
     ports:
       - "5000:5000"
     env_file:
       - .env
     command: /app/entrypoint.sh
+    environment:
+      - UPLOAD_FOLDER=uploads/images
   
   test:
     profiles: ["tools"]
