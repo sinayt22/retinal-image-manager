@@ -60,6 +60,14 @@ class TestImageService:
         upload_folder = tmp_path / "uploads"
         upload_folder.mkdir()
         
+        # Create a test static folder
+        static_folder_path = tmp_path / "static"
+        static_folder_path.mkdir()
+        
+        # Make sure the static/uploads/images directory exists
+        static_uploads = static_folder_path / "uploads" / "images"
+        static_uploads.mkdir(parents=True, exist_ok=True)
+        
         # Mock the current_app.config
         class MockConfig:
             def __getitem__(self, key):
@@ -69,6 +77,7 @@ class TestImageService:
         
         class MockApp:
             config = MockConfig()
+            static_folder = str(static_folder_path)  # Add the static_folder attribute
         
         monkeypatch.setattr('app.services.image_service.current_app', MockApp())
         
@@ -334,6 +343,7 @@ class TestImageService:
         
         class MockApp:
             config = MockConfig()
+            static_folder = 
         
         monkeypatch.setattr('app.services.image_service.current_app', MockApp())
         

@@ -119,14 +119,16 @@ class ImageService:
             raise ValueError(f"Image with ID {image_id} not found")
 
         # Remove from upload folder
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image.image_path)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if image.image_path:
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image.image_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
         
         # Remove from static folder
-        static_path = os.path.join(current_app.static_folder, 'uploads/images', image.image_path)
-        if os.path.exists(static_path):
-            os.remove(static_path)
+        if image.image_path:
+            static_path = os.path.join(current_app.static_folder, 'uploads/images', image.image_path)
+            if os.path.exists(static_path):
+                os.remove(static_path)
 
         db.session.delete(image)
         db.session.commit()
