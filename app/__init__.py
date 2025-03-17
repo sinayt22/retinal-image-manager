@@ -53,9 +53,10 @@ def create_app(config_class=Config):
 
 
 def clean_upload_directory(app):
-    """Remove all files and subdirectories from the upload folder."""
+    """Remove all files and subdirectories from both upload folders."""
     try:
         import shutil
+        # Clean main upload folder
         if os.path.exists(app.config['UPLOAD_FOLDER']):
             for file in os.listdir(app.config['UPLOAD_FOLDER']):
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
@@ -63,9 +64,20 @@ def clean_upload_directory(app):
                     os.unlink(file_path)
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
-            print("All uploaded files have been removed!")
+        
+        # Clean static uploads folder
+        static_uploads = os.path.join(app.static_folder, 'uploads/images')
+        if os.path.exists(static_uploads):
+            for file in os.listdir(static_uploads):
+                file_path = os.path.join(static_uploads, file)
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+        
+        print("All uploaded files have been removed from both directories!")
     except Exception as e:
-        print(f"Error cleaning upload directory: {e}")
+        print(f"Error cleaning upload directories: {e}")
 
 
 def setup_upload_destination(app):
